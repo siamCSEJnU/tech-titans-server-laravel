@@ -26,10 +26,15 @@ Route::middleware(['auth:api', 'can:viewAll,App\Models\Order'])->group(function 
 });
 
 
+Route::apiResource('products', ProductController::class)->only(['index', 'show']);
+Route::get('categories', [CategoryController::class, 'index']);
 
+Route::middleware('auth:api')->group(function () {
+    Route::apiResource('products', ProductController::class)->except(['index', 'show']);
+    Route::get('seller/products', [ProductController::class, 'sellerProducts']);
+});
 
-Route::apiResource('products', ProductController::class);
-Route::apiResource('categories', CategoryController::class);
+Route::apiResource('categories', CategoryController::class); // Keep public if needed
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -60,7 +65,7 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('cart/delete', [CartController::class, 'destroy']);
     Route::post('payment/register', [PaymentController::class, 'store']);
     Route::get('payment/show', [PaymentController::class, 'index']);
-    Route::get('seller/products', [ProductController::class, 'sellerProducts']);
+    // Route::get('seller/products', [ProductController::class, 'sellerProducts']);
 });
 
 // Reviews routes

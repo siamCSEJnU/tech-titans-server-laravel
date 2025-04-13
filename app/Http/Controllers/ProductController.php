@@ -15,6 +15,11 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
+        // First check authentication
+        if (!auth()->check()) {
+            return response()->json(['error' => 'Unauthenticated'], 401);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
@@ -24,9 +29,10 @@ class ProductController extends Controller
             'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048'
         ]);
 
-        // Add seller info from authenticated user
-        $validated['seller_id'] = auth()->id();
-        $validated['seller_email'] = auth()->user()->email;
+        // Get authenticated user safely
+        $user = auth()->user();
+        $validated['seller_id'] = $user->id;
+        $validated['seller_email'] = $user->email;
 
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('products', 'public');
